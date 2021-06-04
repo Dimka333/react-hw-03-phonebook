@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { PureComponent } from 'react';
 import Container from './Component/Container';
 import Section from './Component/Section';
 import ContactForm from './Component/ContactForm';
@@ -6,43 +6,48 @@ import ContactList from './Component/ContactList';
 import Filter from './Component/Filter';
 import shortid from 'shortid';
 
-class App extends Component {
+class App extends PureComponent {
   state = {
-    contacts: [
-      { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
-      { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
-      { id: "id-3", name: "Eden Clements", number: "645-17-79" },
-      { id: "id-4", name: "Annie Copeland", number: "227-91-26" },],
+    contacts: [],
     filter: '',
 
   }
 
   componentDidMount() {
     console.log('componenDidMount');
-    const contacts = localStorage.getItem('contacts');
-    const parseContacts = JSON.parse(contacts);
-    this.setState({ contacts: parseContacts})
+    let contacts = localStorage.getItem('contacts');
+    if (contacts) {
+      contacts = JSON.parse(contacts);
+      this.setState({ contacts: contacts})
+    }
+  } 
+
+  syncLocalStorage = () => {
+    localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-  localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
-}
-  };
+//   componentDidUpdate(prevProps, prevState) {
+//     console.log('obnova');
+//     if (this.state.contacts !== prevState.contacts) {
+// }
+//   };
   
   addContact = ({ name, number }) => {
+
+    if (this.state.contacts.find((el) => el.name === name)) {
+      alert(`${name} is already in contacts`);
+      return;
+    } 
+
     const contact = {
       id: shortid.generate(),
       name,
       number,
     };
-    if (this.state.contacts.find((el) => el.name === contact.name)) {
-      alert(`${contact.name} is already in contacts`);
-      return;
-    } 
+    
     this.setState(({ contacts }) => ({
       contacts: [contact, ...contacts],
-    }));
+    }),() => {this.syncLocalStorage()} );
   };
  
   filterChange = (e) => {
@@ -70,7 +75,7 @@ class App extends Component {
       contacts: prevState.contacts.filter(
         (contact) => contact.id !== contactID
       )
-    }))
+    }),() => {this.syncLocalStorage()})
   };
  
 
