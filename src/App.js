@@ -88,7 +88,7 @@ class App extends Component {
             onChange={this.filterChange}
           />
           <ContactList
-            list={() => this.handleVisibleContacts()}
+            list={this.handleVisibleContacts()}
             onClick={this.deleteContact}/>
         </Section>
     </Container>
